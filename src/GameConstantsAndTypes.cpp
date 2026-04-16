@@ -172,8 +172,7 @@ LuaFunction(
     SortOrderToLocalizedString(Enum::Check<SortOrder>(L, 1)));
 
 static const char* TapNoteScoreNames[] = {
-    "None", "HitMine", "AvoidMine", "CheckpointMiss", "Miss", "W5", "W4",
-    "W3",   "W2",      "W1",        "CheckpointHit",
+    "None", "HitMine", "AvoidMine", "Miss", "W5", "W4", "W3", "W2", "W1",
 };
 struct tns_conversion_helper {
   std::map<std::string, TapNoteScore> conversion_map;
@@ -187,6 +186,8 @@ struct tns_conversion_helper {
     conversion_map["Great"] = TNS_W3;
     conversion_map["Perfect"] = TNS_W2;
     conversion_map["Marvelous"] = TNS_W1;
+    conversion_map["CheckpointMiss"] = TNS_Miss;
+    conversion_map["CheckpointHit"] = TNS_None;
   }
 };
 tns_conversion_helper tns_converter;
@@ -245,26 +246,15 @@ HoldNoteScore StringToHoldNoteScore(const std::string& s) {
 }
 XToLocalizedString(HoldNoteScore);
 
-static const char* TimingWindowNames[] = {"W1",   "W2",        "W3",     "W4",
-                                          "W5",   "Mine",      "Attack", "Hold",
-                                          "Roll", "Checkpoint"};
+static const char* TimingWindowNames[] = {"W1",   "W2",     "W3",   "W4",  "W5",
+                                          "Mine", "Attack", "Hold", "Roll"};
 XToString(TimingWindow);
 LuaXType(TimingWindow);
 StringToX(TimingWindow);
 
 static const char* ScoreEventNames[] = {
-    "CheckpointHit",
-    "W1",
-    "W2",
-    "W3",
-    "W4",
-    "W5",
-    "Miss",
-    "HitMine",
-    "CheckpointMiss",
-    "Held",
-    "LetGo",
-    "MissedHold",
+    "W1",   "W2",      "W3",   "W4",    "W5",
+    "Miss", "HitMine", "Held", "LetGo", "MissedHold",
 };
 XToString(ScoreEvent);
 

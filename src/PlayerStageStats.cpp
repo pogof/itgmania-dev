@@ -613,11 +613,6 @@ bool PlayerStageStats::FullComboOfScore(
     return false;
   }
 
-  // if any checkpoints were missed, it's not a full combo	either
-  if (m_iTapNoteScores[TNS_CheckpointMiss] > 0) {
-    return false;
-  }
-
   // If has any of the judgments below, then not a full combo
   for (int i = TNS_Miss; i < tnsAllGreaterOrEqual; i++) {
     if (m_iTapNoteScores[i] > 0) {

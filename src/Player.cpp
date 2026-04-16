@@ -162,10 +162,6 @@ void TimingWindowSecondsInit(
     case TW_Attack:
       defaultValueOut = 0.135f;
       break;
-    case TW_Checkpoint:  // similar to TW_Hold, but a little more
-                         // strict/accurate to Pump play.
-      defaultValueOut = 0.1664f;
-      break;
     default:
       FAIL_M(ssprintf("Invalid timing window: %i", static_cast<int>(i)));
   }
@@ -209,8 +205,6 @@ ThemeMetric<float> MAX_HOLD_LIFE("Player", "MaxHoldLife");
 ThemeMetric<bool> PENALIZE_TAP_SCORE_NONE("Player", "PenalizeTapScoreNone");
 ThemeMetric<bool> JUDGE_HOLD_NOTES_ON_SAME_ROW_TOGETHER(
     "Player", "JudgeHoldNotesOnSameRowTogether");
-ThemeMetric<bool> CHECKPOINTS_FLASH_ON_HOLD(
-    "Player", "CheckpointsFlashOnHold");  // sm-ssc addition
 ThemeMetric<bool> IMMEDIATE_HOLD_LET_GO("Player", "ImmediateHoldLetGo");
 ThemeMetric<bool> COMBO_BREAK_ON_IMMEDIATE_HOLD_LET_GO(
     "Player", "ComboBreakOnImmediateHoldLetGo");
@@ -256,13 +250,6 @@ ThemeMetric<bool> AVOID_MINE_INCREMENTS_COMBO(
  * miss combo. If set to false, stepping on a mine will not affect the combo. */
 ThemeMetric<bool> MINE_HIT_INCREMENTS_MISS_COMBO(
     "Gameplay", "MineHitIncrementsMissCombo");
-/**
- * @brief Are checkpoints and taps considered separate judgments?
- *
- * If set to true, they are considered separate.
- * If set to false, they are considered the same. */
-ThemeMetric<bool> CHECKPOINTS_TAPS_SEPARATE_JUDGMENT(
-    "Player", "CheckpointsTapsSeparateJudgment");
 /**
  * @brief Do we score missed holds and rolls with HoldNoteScores?
  *
@@ -694,14 +681,10 @@ static void GenerateCacheDataStructure(
 void Player::Load() {
   m_bLoaded = true;
 
-  // Figured this is probably a little expensive so let's cache it
-  m_bTickHolds = GAMESTATE->GetCurrentGame()->m_bTickHolds;
-
   m_LastTapNoteScore = TNS_None;
   // The editor can start playing in the middle of the song.
   const int iNoteRow =
       BeatToNoteRowNotRounded(m_pPlayerState->m_Position.m_fSongBeat);
-  m_iFirstUncrossedRow = iNoteRow - 1;
   m_pJudgedRows->Reset(iNoteRow);
 
   // TODO: Remove use of PlayerNumber.
@@ -1510,9 +1493,8 @@ void Player::UpdateHoldNotes(
                   LOG->Trace("[ ] Holding Button");
           */
 
-          TimingWindow window = m_bTickHolds ? TW_Checkpoint : TW_Hold;
           // LOG->Trace("fLife before minus: %f",fLife);
-          fLife -= fDeltaTime / GetWindowSeconds(window);
+          fLife -= fDeltaTime / GetWindowSeconds(TW_Hold);
           // LOG->Trace("fLife before clamp: %f",fLife);
           fLife = std::max(0.0f, fLife);
           // LOG->Trace("fLife after: %f",fLife);
@@ -1569,59 +1551,7 @@ void Player::UpdateHoldNotes(
 
   // score hold notes that have passed
   if (iSongRow >= iMaxEndRow && bHeadJudged) {
-    bool bLetGoOfHoldNote = false;
-
-    /* Score rolls that end with fLife == 0 as LetGo, even if
-     * m_bTickHolds is on. Rolls don't have iCheckpointsMissed set, so,
-     * unless we check Life == 0, rolls would always be scored as Held. */
-    bool bAllowHoldCheckpoints;
-    switch (subType) {
-      DEFAULT_FAIL(subType);
-      case TapNoteSubType_Hold:
-        bAllowHoldCheckpoints = true;
-        break;
-      case TapNoteSubType_Roll:
-        bAllowHoldCheckpoints = false;
-        break;
-        /*
-        case TapNoteSubType_Mine:
-                bAllowHoldCheckpoints = true;
-                break;
-        */
-    }
-
-    if (m_bTickHolds && bAllowHoldCheckpoints) {
-      // LOG->Trace("(hold checkpoints are allowed and enabled.)");
-      int iCheckpointsHit = 0;
-      int iCheckpointsMissed = 0;
-      for (const TrackRowTapNote& v : vTN) {
-        iCheckpointsHit += v.pTN->HoldResult.iCheckpointsHit;
-        iCheckpointsMissed += v.pTN->HoldResult.iCheckpointsMissed;
-      }
-      bLetGoOfHoldNote = iCheckpointsMissed > 0 || iCheckpointsHit == 0;
-
-      // TRICKY: If the hold is so short that it has no checkpoints,
-      // then mark it as Held if the head was stepped on.
-      if (iCheckpointsHit == 0 && iCheckpointsMissed == 0) {
-        bLetGoOfHoldNote = !bSteppedOnHead;
-      }
-
-      /*
-      if(bLetGoOfHoldNote)
-              LOG->Trace("let go of hold note, life is 0");
-      else
-              LOG->Trace("did not let go of hold note :D");
-      */
-    } else {
-      // LOG->Trace("(hold checkpoints disabled.)");
-      bLetGoOfHoldNote = fLife == 0;
-      /*
-      if(bLetGoOfHoldNote)
-              LOG->Trace("let go of hold note, life is 0");
-      else
-              LOG->Trace("did not let go of hold note :D");
-      */
-    }
+    bool bLetGoOfHoldNote = fLife == 0;
 
     if (bInitiatedNote) {
       if (!bLetGoOfHoldNote) {
@@ -1887,7 +1817,6 @@ void Player::ChangeLife(TapNoteScore tns) {
   switch (tns) {
     case TNS_None:
     case TNS_Miss:
-    case TNS_CheckpointMiss:
     case TNS_HitMine:
       ++m_pPlayerState->m_iTapsMissedSinceLastHasteUpdate;
       break;
@@ -2728,8 +2657,9 @@ void Player::Step(
           HideNote(col, iRowOfOverlappingNoteOrRow);
         }
       }
-    } else if (NoteDataWithScoring::IsRowCompletelyJudged(
-                   m_NoteData, iRowOfOverlappingNoteOrRow)) {
+    } else if (
+        NoteDataWithScoring::IsRowCompletelyJudged(
+            m_NoteData, iRowOfOverlappingNoteOrRow)) {
       FlashGhostRow(iRowOfOverlappingNoteOrRow);
     }
   }
@@ -3119,57 +3049,6 @@ void Player::CrossedRows(int iLastRowCrossed, const RageTimer& now) {
       }
     }
   }
-
-  /* Update hold checkpoints
-   *
-   * TODO: Move this to a separate function. */
-  if (m_bTickHolds && m_pPlayerState->m_PlayerController != PC_AUTOPLAY) {
-    // Few rows typically cross per update. Easier to check all crossed rows
-    // than to calculate from timing segments.
-    for (int r = m_iFirstUncrossedRow; r <= iLastRowCrossed; ++r) {
-      int tickCurrent = m_Timing->GetTickcountAtRow(r);
-
-      // There is a tick count at this row
-      if (tickCurrent > 0 && r % (ROWS_PER_BEAT / tickCurrent) == 0) {
-        std::vector<int> viColsWithHold;
-        int iNumHoldsHeldThisRow = 0;
-        int iNumHoldsMissedThisRow = 0;
-
-        // start at r-1 so that we consider holds whose end rows are equal to
-        // the checkpoint row
-        NoteData::all_tracks_iterator nIter =
-            m_NoteData.GetTapNoteRangeAllTracks(r - 1, r, true);
-        for (; !nIter.IsAtEnd(); ++nIter) {
-          TapNote& tn = *nIter;
-          if (tn.type != TapNoteType_HoldHead) {
-            continue;
-          }
-
-          int iTrack = nIter.Track();
-          viColsWithHold.push_back(iTrack);
-
-          if (tn.HoldResult.fLife > 0) {
-            ++iNumHoldsHeldThisRow;
-            ++tn.HoldResult.iCheckpointsHit;
-          } else {
-            ++iNumHoldsMissedThisRow;
-            ++tn.HoldResult.iCheckpointsMissed;
-          }
-        }
-        GAMESTATE->SetProcessedTimingData(this->m_Timing);
-
-        // TODO: Find a better way of handling hold checkpoints with other taps.
-        if (!viColsWithHold.empty() &&
-            (CHECKPOINTS_TAPS_SEPARATE_JUDGMENT ||
-             m_NoteData.GetNumTapNotesInRow(r) == 0)) {
-          HandleHoldCheckpoint(
-              r, iNumHoldsHeldThisRow, iNumHoldsMissedThisRow, viColsWithHold);
-        }
-      }
-    }
-  }
-
-  m_iFirstUncrossedRow = iLastRowCrossed + 1;
 }
 
 void Player::HandleTapRowScore(unsigned row) {
@@ -3297,69 +3176,6 @@ void Player::HandleTapRowScore(unsigned row) {
   }
 }
 
-void Player::HandleHoldCheckpoint(
-    int iRow, int iNumHoldsHeldThisRow, int iNumHoldsMissedThisRow,
-    const std::vector<int>& viColsWithHold) {
-  bool bNoCheating = true;
-#ifdef DEBUG
-  bNoCheating = false;
-#endif
-
-  // WarpSegments and FakeSegments aren't judged in any way.
-  if (!m_Timing->IsJudgableAtRow(iRow)) {
-    return;
-  }
-
-  // don't accumulate combo if AutoPlay is on.
-  if (bNoCheating && m_pPlayerState->m_PlayerController == PC_AUTOPLAY) {
-    return;
-  }
-
-  const unsigned int iOldCombo =
-      m_pPlayerStageStats ? m_pPlayerStageStats->m_iCurCombo : 0;
-  const unsigned int iOldMissCombo =
-      m_pPlayerStageStats ? m_pPlayerStageStats->m_iCurMissCombo : 0;
-
-  if (m_pPrimaryScoreKeeper) {
-    m_pPrimaryScoreKeeper->HandleHoldCheckpointScore(
-        m_NoteData, iRow, iNumHoldsHeldThisRow, iNumHoldsMissedThisRow);
-  }
-  if (m_pSecondaryScoreKeeper) {
-    m_pSecondaryScoreKeeper->HandleHoldCheckpointScore(
-        m_NoteData, iRow, iNumHoldsHeldThisRow, iNumHoldsMissedThisRow);
-  }
-
-  if (iNumHoldsMissedThisRow == 0) {
-    // added for http://ssc.ajworld.net/sm-ssc/bugtracker/view.php?id=16 -aj
-    if (CHECKPOINTS_FLASH_ON_HOLD && m_pNoteField != nullptr) {
-      for (const int& i : viColsWithHold) {
-        bool bBright = m_pPlayerStageStats &&
-                       m_pPlayerStageStats->m_iCurCombo >
-                           (unsigned int)BRIGHT_GHOST_COMBO_THRESHOLD;
-        if (m_pNoteField) {
-          m_pNoteField->DidHoldNote(i, HNS_Held, bBright);
-        }
-      }
-    }
-  }
-
-  SendComboMessages(iOldCombo, iOldMissCombo);
-
-  if (m_pPlayerStageStats) {
-    SetCombo(
-        m_pPlayerStageStats->m_iCurCombo, m_pPlayerStageStats->m_iCurMissCombo);
-    m_pPlayerStageStats->UpdateComboList(
-        STATSMAN->m_CurStageStats.m_fStepsSeconds, false);
-  }
-
-  ChangeLife(
-      iNumHoldsMissedThisRow == 0 ? TNS_CheckpointHit : TNS_CheckpointMiss);
-
-  SetJudgment(
-      iRow, viColsWithHold[0], TAP_EMPTY,
-      iNumHoldsMissedThisRow == 0 ? TNS_CheckpointHit : TNS_CheckpointMiss, 0);
-}
-
 void Player::HandleHoldScore(const TapNote& tn) {
   HoldNoteScore holdScore = tn.HoldResult.hns;
   TapNoteScore tapScore = tn.result.tns;
@@ -3410,7 +3226,6 @@ float Player::GetMaxStepDistanceSeconds() {
   fMax = std::max(fMax, GetWindowSeconds(TW_Hold));
   fMax = std::max(fMax, GetWindowSeconds(TW_Roll));
   fMax = std::max(fMax, GetWindowSeconds(TW_Attack));
-  fMax = std::max(fMax, GetWindowSeconds(TW_Checkpoint));
   float f = GAMESTATE->m_SongOptions.GetCurrent().m_fMusicRate * fMax;
   return f + m_fMaxInputLatencySeconds;
 }

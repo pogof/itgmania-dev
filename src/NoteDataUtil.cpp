@@ -3367,33 +3367,6 @@ bool NoteDataUtil::GetPrevEditorPosition(const NoteData& in, int& rowInOut) {
   return true;
 }
 
-unsigned int NoteDataUtil::GetTotalHoldTicks(
-    NoteData* nd, const TimingData* td) {
-  unsigned int ret = 0;
-  // Last row must be included. -- Matt
-  int end = nd->GetLastRow() + 1;
-  std::vector<TimingSegment*> segments =
-      td->GetTimingSegments(SEGMENT_TICKCOUNT);
-  // We start with the LAST TimingSegment and work our way backwards.
-  // This way we can continually update end instead of having to lookup when
-  // the next segment starts.
-  for (int i = segments.size() - 1; i >= 0; i--) {
-    TickcountSegment* ts = (TickcountSegment*)segments[i];
-    if (ts->GetTicks() > 0) {
-      // Jump to each point where holds would tick and add the number of holds
-      // there to ret.
-      for (int j = ts->GetRow(); j < end; j += ROWS_PER_BEAT / ts->GetTicks()) {
-        // 1 tick per row.
-        if (nd->GetNumTracksHeldAtRow(j) > 0) {
-          ret++;
-        }
-      }
-    }
-    end = ts->GetRow();
-  }
-  return ret;
-}
-
 /*
  * (c) 2001-2004 Chris Danford, Glenn Maynard
  * All rights reserved.

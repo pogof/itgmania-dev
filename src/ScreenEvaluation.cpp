@@ -87,9 +87,6 @@ XToString(DetailLine);
   THEME->GetMetricB(m_sName, "PlayerOptionsHideFailType")
 #define PLAYER_OPTIONS_SEPARATOR \
   THEME->GetMetric(m_sName, "PlayerOptionsSeparator")
-#define CHECKPOINTS_WITH_JUDGMENTS \
-  THEME->GetMetricB(m_sName, "CheckpointsWithJudgments")
-
 static ThemeMetric<TapNoteScore> g_MinScoreToMaintainCombo(
     "Gameplay", "MinScoreToMaintainCombo");
 static const int NUM_SHOWN_RADAR_CATEGORIES = 5;
@@ -558,22 +555,11 @@ void ScreenEvaluation::Init() {
 
         int iValue;
         switch (l) {
-          /* xxx: This doesn't seem to handle checkpoints correctly.
-           * Something about checkpoints needing to be tied into
-           * the correct judgments instead of just W1/W2. Misses are ok. */
           case JudgmentLine_W1:
             iValue = m_pStageStats->m_player[p].m_iTapNoteScores[TNS_W1];
-            if (CHECKPOINTS_WITH_JUDGMENTS && GAMESTATE->ShowW1()) {
-              iValue += m_pStageStats->m_player[p]
-                            .m_iTapNoteScores[TNS_CheckpointHit];
-            }
             break;
           case JudgmentLine_W2:
             iValue = m_pStageStats->m_player[p].m_iTapNoteScores[TNS_W2];
-            if (CHECKPOINTS_WITH_JUDGMENTS && !GAMESTATE->ShowW1()) {
-              iValue += m_pStageStats->m_player[p]
-                            .m_iTapNoteScores[TNS_CheckpointHit];
-            }
             break;
           case JudgmentLine_W3:
             iValue = m_pStageStats->m_player[p].m_iTapNoteScores[TNS_W3];
@@ -586,10 +572,6 @@ void ScreenEvaluation::Init() {
             break;
           case JudgmentLine_Miss:
             iValue = m_pStageStats->m_player[p].m_iTapNoteScores[TNS_Miss];
-            if (CHECKPOINTS_WITH_JUDGMENTS) {
-              iValue += m_pStageStats->m_player[p]
-                            .m_iTapNoteScores[TNS_CheckpointMiss];
-            }
             break;
           case JudgmentLine_Held:
             iValue = m_pStageStats->m_player[p].m_iHoldNoteScores[HNS_Held];

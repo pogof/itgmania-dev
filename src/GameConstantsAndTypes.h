@@ -239,19 +239,17 @@ inline bool IsSongSort(SortOrder so) {
 
 /** @brief The list of tap note scores available during play. */
 enum TapNoteScore {
-  TNS_None,           /**< There is no score involved with this one. */
-  TNS_HitMine,        /**< A mine was hit successfully. */
-  TNS_AvoidMine,      /**< A mine was avoided successfully. */
-  TNS_CheckpointMiss, /**< A checkpoint was missed during a hold. */
-  TNS_Miss,           /**< A note was missed entirely. */
-  TNS_W5,             /**< A note was almost missed, but not quite. */
-  TNS_W4,             /**< A note was hit either a bit early or a bit late. */
-  TNS_W3, /**< A note was hit with decent accuracy, but not the best. */
+  TNS_None,      /**< There is no score involved with this one. */
+  TNS_HitMine,   /**< A mine was hit successfully. */
+  TNS_AvoidMine, /**< A mine was avoided successfully. */
+  TNS_Miss,      /**< A note was missed entirely. */
+  TNS_W5,        /**< A note was almost missed, but not quite. */
+  TNS_W4,        /**< A note was hit either a bit early or a bit late. */
+  TNS_W3,        /**< A note was hit with decent accuracy, but not the best. */
   TNS_W2, /**< A note was hit off by just a miniscule amount. This used to be
              the best rating. */
   TNS_W1, /**< A note was hit perfectly. */
-  TNS_CheckpointHit, /**< A checkpoint was held during a hold. */
-  NUM_TapNoteScore,  /**< The number of Tap Note Scores available. */
+  NUM_TapNoteScore, /**< The number of Tap Note Scores available. */
   TapNoteScore_Invalid,
 };
 /**
@@ -315,7 +313,6 @@ enum TimingWindow {
   TW_Attack,
   TW_Hold,
   TW_Roll,
-  TW_Checkpoint,
   NUM_TimingWindow,
   TimingWindow_Invalid,
 };
@@ -324,7 +321,6 @@ LuaDeclareType(TimingWindow);
 
 /** @brief The list of score events that can take place while playing. */
 enum ScoreEvent {
-  SE_CheckpointHit,
   SE_W1,
   SE_W2,
   SE_W3,
@@ -332,7 +328,6 @@ enum ScoreEvent {
   SE_W5,
   SE_Miss,
   SE_HitMine,
-  SE_CheckpointMiss,
   SE_Held,
   SE_LetGo,
   SE_Missed,

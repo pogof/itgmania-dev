@@ -45,12 +45,6 @@ static void TugMeterPercentChangeInit(
     case SE_HitMine:
       defaultValueOut = -0.040f;
       break;
-    case SE_CheckpointHit:
-      defaultValueOut = +0.002f;
-      break;
-    case SE_CheckpointMiss:
-      defaultValueOut = -0.002f;
-      break;
     case SE_Held:
       defaultValueOut = +0.008f;
       break;
@@ -126,12 +120,6 @@ void CombinedLifeMeterTug::ChangeLife(PlayerNumber pn, TapNoteScore score) {
       break;
     case TNS_HitMine:
       fPercentToMove = g_fTugMeterPercentChange[SE_HitMine];
-      break;
-    case TNS_CheckpointHit:
-      fPercentToMove = g_fTugMeterPercentChange[SE_CheckpointHit];
-      break;
-    case TNS_CheckpointMiss:
-      fPercentToMove = g_fTugMeterPercentChange[SE_CheckpointMiss];
       break;
     default:
       FAIL_M(ssprintf("Invalid TapNotScore: %i", score));

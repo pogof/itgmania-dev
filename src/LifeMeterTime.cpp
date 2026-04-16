@@ -33,7 +33,6 @@ static ThemeMetric<float> INITIAL_VALUE("LifeMeterTime", "InitialValue");
 static ThemeMetric<float> MIN_LIFE_TIME("LifeMeterTime", "MinLifeTime");
 
 static const float g_fTimeMeterSecondsChangeInit[] = {
-    +0.0f,  // SE_CheckpointHit
     +0.2f,  // SE_W1
     +0.0f,  // SE_W2
     -0.5f,  // SE_W3
@@ -41,7 +40,6 @@ static const float g_fTimeMeterSecondsChangeInit[] = {
     -2.0f,  // SE_W5
     -4.0f,  // SE_Miss
     -2.0f,  // SE_HitMine
-    -0.0f,  // SE_CheckpointMiss
     -0.0f,  // SE_Held
     -4.0f,  // SE_LetGo
     -0.0f,  // SE_Missed
@@ -168,12 +166,6 @@ void LifeMeterTime::ChangeLife(TapNoteScore tns) {
       break;
     case TNS_HitMine:
       fMeterChange = g_fTimeMeterSecondsChange[SE_HitMine];
-      break;
-    case TNS_CheckpointHit:
-      fMeterChange = g_fTimeMeterSecondsChange[SE_CheckpointHit];
-      break;
-    case TNS_CheckpointMiss:
-      fMeterChange = g_fTimeMeterSecondsChange[SE_CheckpointMiss];
       break;
   }
 

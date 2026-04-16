@@ -247,8 +247,6 @@ class LunaHoldNoteResult : public Luna<HoldNoteResult> {
   DEFINE_METHOD(GetLife, fLife);
   DEFINE_METHOD(GetOverlappedTime, fOverlappedTime);
   DEFINE_METHOD(GetLastHeldBeat, GetLastHeldBeat());
-  DEFINE_METHOD(GetCheckpointsHit, iCheckpointsHit);
-  DEFINE_METHOD(GetCheckpointsMissed, iCheckpointsMissed);
   DEFINE_METHOD(GetHeld, bHeld);
   DEFINE_METHOD(GetActive, bActive);
 
@@ -257,8 +255,6 @@ class LunaHoldNoteResult : public Luna<HoldNoteResult> {
     ADD_METHOD(GetLife);
     ADD_METHOD(GetOverlappedTime);
     ADD_METHOD(GetLastHeldBeat);
-    ADD_METHOD(GetCheckpointsHit);
-    ADD_METHOD(GetCheckpointsMissed);
     ADD_METHOD(GetHeld);
     ADD_METHOD(GetActive);
   }

@@ -57,9 +57,6 @@ class ScoreKeeper {
   virtual void HandleTapRowScore(const NoteData& /* nd */, int /* iRow */) {}
   virtual void HandleHoldScore(const TapNote&) {}
   virtual void HandleHoldActiveSeconds(float /* fMusicSecondsHeld */) {}
-  virtual void HandleHoldCheckpointScore(
-      const NoteData& /*nd */, int /* iRow */, int /* iNumHoldsHeldThisRow */,
-      int /* iNumHoldsMissedThisRow */) {}
   virtual void HandleTapScoreNone() {}
 
  protected:

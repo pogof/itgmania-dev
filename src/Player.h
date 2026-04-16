@@ -148,9 +148,6 @@ class Player : public ActorFrame {
   void FlashGhostRow(int iRow);
   void HandleTapRowScore(unsigned row);
   void HandleHoldScore(const TapNote& tn);
-  void HandleHoldCheckpoint(
-      int iRow, int iNumHoldsHeldThisRow, int iNumHoldsMissedThisRow,
-      const std::vector<int>& viColsWithHold);
   void DrawTapJudgments();
   void DrawHoldJudgments();
   void SendComboMessages(unsigned int iOldCombo, unsigned int iOldMissCombo);
@@ -227,7 +224,6 @@ class Player : public ActorFrame {
   ScoreKeeper* m_pSecondaryScoreKeeper;
   Inventory* m_pInventory;
 
-  int m_iFirstUncrossedRow;  // used by hold checkpoints logic
   NoteData::all_tracks_iterator* m_pIterNeedsTapJudging;
   NoteData::all_tracks_iterator* m_pIterNeedsHoldJudging;
   NoteData::all_tracks_iterator* m_pIterUncrossedRows;
@@ -267,7 +263,6 @@ class Player : public ActorFrame {
   TweenState m_tsCombo[NUM_REVERSE][NUM_CENTERED];
 
   bool m_bSendJudgmentAndComboMessages;
-  bool m_bTickHolds;
   // This exists so that the board can be drawn underneath combo/judge. -Kyz
   bool m_drawing_notefield_board;
 };

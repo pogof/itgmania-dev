@@ -166,13 +166,11 @@ void LifeMeterBattery::ChangeLife(TapNoteScore score) {
   }
 
   bool bSubtract = false;
-  // this probably doesn't handle hold checkpoints. -aj
   if (score == TNS_HitMine && MINES_SUBTRACT_LIVES > 0) {
     SubtractLives(MINES_SUBTRACT_LIVES);
     bSubtract = true;
   } else {
-    if (score < MIN_SCORE_TO_KEEP_LIFE && score > TNS_CheckpointMiss &&
-        SUBTRACT_LIVES > 0) {
+    if (score < MIN_SCORE_TO_KEEP_LIFE && SUBTRACT_LIVES > 0) {
       SubtractLives(SUBTRACT_LIVES);
       bSubtract = true;
     }

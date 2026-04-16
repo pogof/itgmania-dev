@@ -304,8 +304,6 @@ void NoteDataWithScoring::GetActualRadarValues(
   // limit to the max combo. -Kyz
   int first_hittable_row = -1;
   int last_hittable_row = -1;
-  bool tick_holds = GAMESTATE->GetCurrentGame()->m_bTickHolds;
-
   while (!curr_note.IsAtEnd()) {
     if (curr_note.Row() != state.curr_row) {
       DoRowEndRadarActualCalc(state, out);
@@ -328,13 +326,6 @@ void NoteDataWithScoring::GetActualRadarValues(
     if (state.judgable && for_this_player) {
       switch (curr_note->type) {
         case TapNoteType_HoldTail:
-          // If there are tick holds, then the hold tail needs to be counted
-          // in last_hittable_row because that's where the combo will end.
-          // -Kyz
-          if (tick_holds) {
-            UpdateHittable(
-                state.curr_row, first_hittable_row, last_hittable_row);
-          }
           break;
         case TapNoteType_Tap:
         case TapNoteType_HoldHead:

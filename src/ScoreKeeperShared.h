@@ -26,9 +26,6 @@ class ScoreKeeperShared : public ScoreKeeperNormal {
   virtual void HandleTapRowScore(const NoteData& nd, int iRow);
   virtual void HandleHoldScore(const TapNote& tn);
   virtual void HandleHoldActiveSeconds(float fMusicSecondsHeld);
-  virtual void HandleHoldCheckpointScore(
-      const NoteData& nd, int iRow, int iNumHoldsHeldThisRow,
-      int iNumHoldsMissedThisRow);
   virtual void HandleTapScoreNone();
 };
 #endif

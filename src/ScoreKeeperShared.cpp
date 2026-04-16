@@ -76,16 +76,6 @@ void ScoreKeeperShared::HandleHoldActiveSeconds(float fMusicSecondsHeld) {
   ScoreKeeperNormal::HandleHoldActiveSeconds(fMusicSecondsHeld);
 }
 
-void ScoreKeeperShared::HandleHoldCheckpointScore(
-    const NoteData& nd, int iRow, int iNumHoldsHeldThisRow,
-    int iNumHoldsMissedThisRow) {
-  if (m_pPlayerState->m_PlayerNumber != GAMESTATE->GetMasterPlayerNumber()) {
-    return;
-  }
-  ScoreKeeperNormal::HandleHoldCheckpointScore(
-      nd, iRow, iNumHoldsHeldThisRow, iNumHoldsMissedThisRow);
-}
-
 void ScoreKeeperShared::HandleTapScoreNone() {
   if (m_pPlayerState->m_PlayerNumber != GAMESTATE->GetMasterPlayerNumber()) {
     return;

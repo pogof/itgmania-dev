@@ -221,10 +221,6 @@ function ComboPerRow()
 	end
 end
 
-function EvalUsesCheckpointsWithJudgments()
-	return (CurGameName() == "pump") and true or false
-end
-
 local ComboThresholds = {
 	dance	= { Hit = 2, Miss = 2, Fail = -1 },
 	pump	= { Hit = 4, Miss = 4, Fail = 51 },

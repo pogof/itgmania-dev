@@ -954,8 +954,8 @@ static void InitializeConfOptions() {
       "16", "17", "18", "19", "20"));
   ADD(ConfOption(
       "MinTNSToHideNotes", MovePref<TapNoteScore>, "TNS_None", "TNS_HitMine",
-      "TNS_AvoidMine", "TNS_CheckpointMiss", "TNS_Miss", "TNS_W5", "TNS_W4",
-      "TNS_W3", "TNS_W2", "TNS_W1", "TNS_CheckpointHit"));
+      "TNS_AvoidMine", "TNS_Miss", "TNS_W5", "TNS_W4", "TNS_W3", "TNS_W2",
+      "TNS_W1"));
   ADD(ConfOption("ProfileSortOrderAscending", MovePref<bool>, "No", "Yes"));
   g_ConfOptions.back().m_iEffects = OPT_APPLY_PROFILES;
   ADD(ConfOption(
